@@ -2,6 +2,7 @@ package com.sg.watchmarket.data.api
 
 import com.sg.watchmarket.data.dto.AssetDto
 import com.sg.watchmarket.data.dto.CandleResponseDto
+import com.sg.watchmarket.data.dto.IndicatorDto
 import com.sg.watchmarket.data.dto.QuoteDto
 import retrofit2.http.Body
 import retrofit2.http.DELETE
@@ -26,6 +27,12 @@ interface MarketApi {
         @Query("tf") tf: String,
         @Query("limit") limit: Int,
     ): Response<CandleResponseDto>
+
+    @GET("v1/indicators")
+    suspend fun getIndicators(
+        @Query("id") id: String,
+        @Query("tf") tf: String,
+    ): Response<IndicatorDto>
 
     @GET("v1/search")
     suspend fun searchAssets(

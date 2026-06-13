@@ -606,4 +606,18 @@ private val previewItems = listOf(
         currency = "USDT",
         changeRate24h = -0.0062,
     ),
+    WatchListItem(
+        id = "SOL",
+        display = "SOL/USDT",
+        price = 142.78,
+        currency = "USDT",
+        changeRate24h = 0.031,
+    ),
+    WatchListItem(
+        id = "XRP",
+        display = "XRP/USDT",
+        price = 0.52,
+        currency = "USDT",
+        changeRate24h = -0.0142,
+    ),
 )

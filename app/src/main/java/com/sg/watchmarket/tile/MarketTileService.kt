@@ -7,7 +7,6 @@ import com.sg.watchmarket.MainActivity
 import com.sg.watchmarket.data.cache.SharedPreferencesMarketResponseCache
 import com.sg.watchmarket.data.dto.QuoteDto
 import java.util.Locale
-import kotlin.math.abs
 import androidx.wear.protolayout.LayoutElementBuilders
 import androidx.wear.protolayout.LayoutElementBuilders.Column
 import androidx.wear.protolayout.LayoutElementBuilders.Spacer
@@ -31,7 +30,7 @@ import androidx.wear.tiles.TileBuilders.Tile
 import androidx.wear.tiles.TileService
 
 private const val ResourcesVersion = "1"
-private val TileAssetIds = listOf("BTC", "ETH")
+private val TileAssetIds = listOf("BTC", "ETH", "SOL", "XRP")
 
 class MarketTileService : TileService() {
     override fun onTileRequest(requestParams: RequestBuilders.TileRequest): ListenableFuture<Tile?> {
@@ -78,7 +77,7 @@ private fun MaterialScope.marketTileLayout(
     primaryLayout(
         titleSlot = {
             text(
-                text = "Market glance".layoutString,
+                text = "Market".layoutString,
                 typography = TITLE_SMALL,
             )
         },
@@ -119,7 +118,7 @@ private fun emptyTileContent(): LayoutElementBuilders.LayoutElement =
 private fun quoteTileContent(quotes: List<QuoteDto>): LayoutElementBuilders.LayoutElement {
     val normalizedQuotes = quotes
         .sortedBy { quote -> TileAssetIds.indexOf(quote.id.uppercase(Locale.US)).takeIf { it >= 0 } ?: 99 }
-        .take(2)
+        .take(4)
 
     val builder = Column.Builder()
     normalizedQuotes.forEachIndexed { index, quote ->
@@ -147,33 +146,7 @@ private fun QuoteDto.toTileLine(): String {
         .substringBefore("/")
         .trim()
         .ifBlank { id }
-    return "$label ${formatTilePrice(price, currency)} ${formatTileChange(changeRate24h)}"
-}
-
-private fun formatTilePrice(
-    price: Double,
-    currency: String,
-): String {
-    val absolutePrice = abs(price)
-    val sign = if (price < 0.0) "-" else ""
-    if (absolutePrice >= 1_000_000.0) {
-        return String.format(Locale.US, "%s%.2fM", sign, absolutePrice / 1_000_000.0)
-    }
-    if (absolutePrice >= 10_000.0) {
-        return String.format(Locale.US, "%s%.1fK", sign, absolutePrice / 1_000.0)
-    }
-    if (absolutePrice >= 1_000.0) {
-        return String.format(Locale.US, "%s%.2fK", sign, absolutePrice / 1_000.0)
-    }
-
-    val decimals = when {
-        currency.equals("KRW", ignoreCase = true) -> 0
-        absolutePrice >= 1.0 -> 2
-        absolutePrice >= 0.01 -> 4
-        absolutePrice > 0.0 -> 8
-        else -> 2
-    }
-    return String.format(Locale.US, "%,.${decimals}f", price)
+    return "$label ${formatTileChange(changeRate24h)}"
 }
 
 private fun formatTileChange(changeRate: Double): String =

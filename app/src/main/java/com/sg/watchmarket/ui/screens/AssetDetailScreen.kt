@@ -35,6 +35,7 @@ import androidx.wear.compose.material.Text
 import androidx.wear.compose.material.TimeText
 import com.sg.watchmarket.data.cache.SharedPreferencesMarketResponseCache
 import com.sg.watchmarket.data.dto.CandleResponseDto
+import com.sg.watchmarket.data.dto.IndicatorDto
 import com.sg.watchmarket.data.repository.FastApiMarketRepository
 import com.sg.watchmarket.data.repository.MarketApiResult
 import com.sg.watchmarket.data.repository.MarketRepository
@@ -136,6 +137,23 @@ fun AssetDetailScreen(
                 } else {
                     lastGoodData = detailData
                     state = AssetDetailUiState.Loaded(detailData)
+
+                    val indicatorData = when (
+                        val indicatorResult = repository.getIndicators(
+                            normalizedAssetId,
+                            selectedTimeframe,
+                        )
+                    ) {
+                        is MarketApiResult.Success -> detailData.copy(
+                            indicators = indicatorResult.value,
+                            indicatorMessage = null,
+                        )
+                        else -> detailData.copy(
+                            indicatorMessage = "Unavailable",
+                        )
+                    }
+                    lastGoodData = indicatorData
+                    state = AssetDetailUiState.Loaded(indicatorData)
                 }
             }
             else -> {
@@ -298,6 +316,12 @@ private fun DetailLoaded(
         item {
             PriceSummary(data = data)
         }
+        item {
+            IndicatorPanel(
+                indicators = data.indicators,
+                message = data.indicatorMessage,
+            )
+        }
     }
 }
 
@@ -411,6 +435,77 @@ private fun PriceSummary(
             text = "${formatPrice(data.latestClose, data.currency)} ${data.currency}",
             style = MaterialTheme.typography.title3,
             textAlign = TextAlign.Center,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+    }
+}
+
+@Composable
+private fun IndicatorPanel(
+    indicators: IndicatorDto?,
+    message: String?,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth(0.94f)
+            .clip(RoundedCornerShape(18.dp))
+            .background(MaterialTheme.colors.surface)
+            .padding(horizontal = 12.dp, vertical = 10.dp),
+        verticalArrangement = Arrangement.spacedBy(5.dp),
+    ) {
+        Text(
+            text = "Indicators",
+            style = MaterialTheme.typography.caption1,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+
+        if (indicators == null) {
+            Text(
+                text = message ?: "Loading",
+                style = MaterialTheme.typography.caption2,
+                color = MaterialTheme.colors.onSurface.copy(alpha = 0.72f),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        } else {
+            IndicatorRow("RSI 14", String.format(Locale.US, "%.1f", indicators.rsi14))
+            IndicatorRow("24h Vol", formatVolume(indicators.volume24h, indicators.volumeCurrency))
+            IndicatorRow("Now Vol", formatVolume(indicators.currentCandleVolume, indicators.volumeCurrency))
+            IndicatorRow("Avg 7d", formatVolume(indicators.volumeAvg7d, indicators.volumeCurrency))
+            IndicatorRow("Avg 30d", formatVolume(indicators.volumeAvg30d, indicators.volumeCurrency))
+            IndicatorRow("Avg 6m", formatVolume(indicators.volumeAvg180d, indicators.volumeCurrency))
+            IndicatorRow("Avg 1y", formatVolume(indicators.volumeAvg365d, indicators.volumeCurrency))
+        }
+    }
+}
+
+@Composable
+private fun IndicatorRow(
+    label: String,
+    value: String,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = label,
+            modifier = Modifier.weight(0.75f),
+            style = MaterialTheme.typography.caption2,
+            color = MaterialTheme.colors.onSurface.copy(alpha = 0.72f),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+        Text(
+            text = value,
+            modifier = Modifier.weight(1.25f),
+            style = MaterialTheme.typography.caption2,
+            textAlign = TextAlign.End,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )
@@ -581,6 +676,31 @@ private fun formatPrice(
     return String.format(Locale.US, "%,.${decimals}f", price)
 }
 
+private fun formatVolume(
+    volume: Double,
+    currency: String,
+): String {
+    val absoluteVolume = abs(volume)
+    val sign = if (volume < 0.0) "-" else ""
+    val compactValue = when {
+        absoluteVolume >= 1_000_000_000_000.0 ->
+            String.format(Locale.US, "%s%.2fT", sign, absoluteVolume / 1_000_000_000_000.0)
+        absoluteVolume >= 1_000_000_000.0 ->
+            String.format(Locale.US, "%s%.2fB", sign, absoluteVolume / 1_000_000_000.0)
+        absoluteVolume >= 1_000_000.0 ->
+            String.format(Locale.US, "%s%.2fM", sign, absoluteVolume / 1_000_000.0)
+        absoluteVolume >= 1_000.0 ->
+            String.format(Locale.US, "%s%.2fK", sign, absoluteVolume / 1_000.0)
+        else -> String.format(Locale.US, "%,.2f", volume)
+    }
+
+    return if (currency.isBlank()) {
+        compactValue
+    } else {
+        "$compactValue $currency"
+    }
+}
+
 private fun compactAssetDisplay(display: String): String =
     display
         .substringBefore("/")
@@ -646,6 +766,20 @@ private val previewDetailData = AssetDetailData(
     latestClose = 65020.0,
     latestTimestamp = 1710000000000,
     candleCount = 60,
+    indicators = com.sg.watchmarket.data.dto.IndicatorDto(
+        id = "BTC",
+        tf = "5m",
+        currency = "USDT",
+        rsi14 = 58.7,
+        currentCandleVolume = 1_240_000.0,
+        volume24h = 803_500_000.0,
+        volumeAvg7d = 770_000_000.0,
+        volumeAvg30d = 735_000_000.0,
+        volumeAvg180d = 710_000_000.0,
+        volumeAvg365d = 690_000_000.0,
+        volumeCurrency = "USDT",
+        timestamp = 1710000000000,
+    ),
     candles = listOf(
         com.sg.watchmarket.data.dto.CandleDto(
             t = 1710000000000,

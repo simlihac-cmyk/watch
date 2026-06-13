@@ -10,6 +10,7 @@ import com.sg.watchmarket.data.cache.MarketResponseCache
 import com.sg.watchmarket.data.cache.NoOpMarketResponseCache
 import com.sg.watchmarket.data.dto.AssetDto
 import com.sg.watchmarket.data.dto.CandleResponseDto
+import com.sg.watchmarket.data.dto.IndicatorDto
 import com.sg.watchmarket.data.dto.QuoteDto
 import java.io.IOException
 import java.util.Locale
@@ -26,6 +27,11 @@ interface MarketRepository {
         tf: String,
         limit: Int,
     ): MarketApiResult<CandleResponseDto>
+
+    suspend fun getIndicators(
+        id: String,
+        tf: String,
+    ): MarketApiResult<IndicatorDto>
 
     suspend fun searchAssets(query: String): MarketApiResult<List<AssetDto>>
 
@@ -84,6 +90,17 @@ class FastApiMarketRepository(
             else -> result
         }
     }
+
+    override suspend fun getIndicators(
+        id: String,
+        tf: String,
+    ): MarketApiResult<IndicatorDto> =
+        safeApiCall {
+            api.getIndicators(
+                id = id.uppercase(Locale.US),
+                tf = tf,
+            )
+        }
 
     override suspend fun searchAssets(query: String): MarketApiResult<List<AssetDto>> =
         safeApiCall { api.searchAssets(query.trim()) }

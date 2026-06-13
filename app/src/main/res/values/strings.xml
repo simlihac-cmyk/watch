@@ -2,5 +2,5 @@
 <resources>
     <string name="app_name">Watch Market</string>
     <string name="market_tile_label">Market glance</string>
-    <string name="market_tile_description">Shows cached BTC and ETH market quotes.</string>
+    <string name="market_tile_description">Shows cached BTC, ETH, SOL, and XRP market changes.</string>
 </resources>

@@ -37,8 +37,9 @@ The watch app uses Retrofit to call only the FastAPI server:
 GET /v1/assets
 GET /v1/search?q=BTC
 POST /v1/watchlist
-GET /v1/quotes?ids=BTC,ETH
+GET /v1/quotes?ids=BTC,ETH,SOL,XRP
 GET /v1/candles?id=BTC&tf=5m&limit=120
+GET /v1/indicators?id=BTC&tf=5m
 ```
 
 `FastApiMarketRepository` adds the Bearer token through an OkHttp interceptor and returns `MarketApiResult` values for success, unauthorized, network failure, HTTP failure, and invalid responses.
@@ -75,9 +76,9 @@ The debug APK includes a Wear OS Tile named `Market glance`. On the watch:
 1. Long-press the watch face.
 2. Edit tiles/widgets.
 3. Add `Market glance`.
-4. Open the app once to load quotes; the tile then shows the last successful BTC and ETH quote cache.
+4. Open the app once to load quotes; the tile then shows the last successful BTC, ETH, SOL, and XRP change-rate cache.
 
-The tile opens the main app when tapped. It does not call Binance, KIS, or any provider directly.
+The tile opens the main app when tapped. It shows compact 24h percentage changes only and does not call Binance, KIS, or any provider directly.
 
 ## Add Assets On The Watch
 
@@ -85,9 +86,25 @@ Use the `+` button on the watch list to search and add assets. The watch sends t
 
 The current MVP is intentionally crypto-only:
 
-- Crypto ids already configured on the server, such as `BTC` or `ETH`.
+- Crypto ids already configured on the server: `BTC`, `ETH`, `SOL`, and `XRP`.
 
 Stock search/add can be enabled later on the server after choosing and configuring a stock data provider. The watch app still never talks directly to Binance, KIS, or other providers.
+
+## Detail Indicators
+
+The detail screen loads candles first, then requests `/v1/indicators` for the selected asset and timeframe. The chart and price remain visible if indicators fail; only the indicator panel shows `Unavailable`.
+
+Current indicators:
+
+- `RSI 14`
+- `24h Vol`
+- `Now Vol`
+- `Avg 7d`
+- `Avg 30d`
+- `Avg 6m`
+- `Avg 1y`
+
+Volume values are displayed in the server-provided `volumeCurrency`, currently `USDT` for crypto.
 
 ## Price Alerts
 

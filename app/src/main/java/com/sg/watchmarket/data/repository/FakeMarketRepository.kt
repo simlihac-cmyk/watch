@@ -3,6 +3,7 @@ package com.sg.watchmarket.data.repository
 import com.sg.watchmarket.data.dto.AssetDto
 import com.sg.watchmarket.data.dto.CandleDto
 import com.sg.watchmarket.data.dto.CandleResponseDto
+import com.sg.watchmarket.data.dto.IndicatorDto
 import com.sg.watchmarket.data.dto.QuoteDto
 
 class FakeMarketRepository : MarketRepository {
@@ -37,6 +38,27 @@ class FakeMarketRepository : MarketRepository {
             ),
         )
     }
+
+    override suspend fun getIndicators(
+        id: String,
+        tf: String,
+    ): MarketApiResult<IndicatorDto> =
+        MarketApiResult.Success(
+            IndicatorDto(
+                id = id.uppercase(),
+                tf = tf,
+                currency = "USDT",
+                rsi14 = 58.7,
+                currentCandleVolume = 1_240_000.0,
+                volume24h = 803_500_000.0,
+                volumeAvg7d = 770_000_000.0,
+                volumeAvg30d = 735_000_000.0,
+                volumeAvg180d = 710_000_000.0,
+                volumeAvg365d = 690_000_000.0,
+                volumeCurrency = "USDT",
+                timestamp = 1710000000000,
+            ),
+        )
 
     override suspend fun searchAssets(query: String): MarketApiResult<List<AssetDto>> {
         val normalizedQuery = query.trim().uppercase()
@@ -80,6 +102,20 @@ class FakeMarketRepository : MarketRepository {
                 symbol = "ETHUSDT",
                 currency = "USDT",
             ),
+            AssetDto(
+                id = "SOL",
+                display = "SOL/USDT",
+                provider = "binance",
+                symbol = "SOLUSDT",
+                currency = "USDT",
+            ),
+            AssetDto(
+                id = "XRP",
+                display = "XRP/USDT",
+                provider = "binance",
+                symbol = "XRPUSDT",
+                currency = "USDT",
+            ),
         )
 
         val fakeQuotes = listOf(
@@ -97,6 +133,22 @@ class FakeMarketRepository : MarketRepository {
                 currency = "USDT",
                 price = 3450.34,
                 changeRate24h = -0.0062,
+                timestamp = 1710000000000,
+            ),
+            QuoteDto(
+                id = "SOL",
+                display = "SOL/USDT",
+                currency = "USDT",
+                price = 142.78,
+                changeRate24h = 0.031,
+                timestamp = 1710000000000,
+            ),
+            QuoteDto(
+                id = "XRP",
+                display = "XRP/USDT",
+                currency = "USDT",
+                price = 0.52,
+                changeRate24h = -0.0142,
                 timestamp = 1710000000000,
             ),
         )

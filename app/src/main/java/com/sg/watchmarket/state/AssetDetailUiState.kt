@@ -1,6 +1,7 @@
 package com.sg.watchmarket.state
 
 import com.sg.watchmarket.data.dto.CandleDto
+import com.sg.watchmarket.data.dto.IndicatorDto
 
 data class AssetDetailData(
     val assetId: String,
@@ -11,6 +12,8 @@ data class AssetDetailData(
     val latestTimestamp: Long,
     val candleCount: Int,
     val candles: List<CandleDto>,
+    val indicators: IndicatorDto? = null,
+    val indicatorMessage: String? = null,
     val isStale: Boolean = false,
 )
 
