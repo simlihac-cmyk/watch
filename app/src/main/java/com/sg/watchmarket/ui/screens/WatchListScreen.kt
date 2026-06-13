@@ -117,24 +117,20 @@ fun WatchListScreen(
             return
         }
 
-        val quotes: List<QuoteDto>
-        val isQuoteStale: Boolean
-        when (val result = repository.getQuotes(assetIds)) {
-            is MarketApiResult.Success -> {
-                quotes = result.value
-                isQuoteStale = result.isStale
-            }
-            else -> {
-                setError(result.toUserMessage("quotes"))
-                return
-            }
+        val quoteLoad = loadQuotesWithFallback(
+            repository = repository,
+            assetIds = assetIds,
+        )
+        if (quoteLoad.quotes.isEmpty()) {
+            setError(quoteLoad.warning ?: "No quotes were returned.")
+            return
         }
 
         val items = buildWatchListItems(
             assets = assets,
-            quotes = quotes,
+            quotes = quoteLoad.quotes,
             ids = assetIds,
-            isStale = isQuoteStale,
+            isStale = quoteLoad.isStale || quoteLoad.warning != null,
         )
 
         if (items.isEmpty()) {
@@ -143,10 +139,17 @@ fun WatchListScreen(
         }
 
         lastGoodItems = items
-        state = WatchListUiState.Loaded(
-            items = items,
-            isStale = isQuoteStale,
-        )
+        state = if (quoteLoad.warning == null) {
+            WatchListUiState.Loaded(
+                items = items,
+                isStale = quoteLoad.isStale,
+            )
+        } else {
+            WatchListUiState.Error(
+                message = quoteLoad.warning,
+                staleItems = items.map { it.copy(isStale = true) },
+            )
+        }
     }
 
     LaunchedEffect(repository, reloadKey, externalReloadKey) {
@@ -466,6 +469,56 @@ private fun buildWatchListItems(
         )
     }
 }
+
+private data class QuoteLoadResult(
+    val quotes: List<QuoteDto>,
+    val isStale: Boolean,
+    val warning: String? = null,
+)
+
+private suspend fun loadQuotesWithFallback(
+    repository: MarketRepository,
+    assetIds: List<String>,
+): QuoteLoadResult {
+    return when (val result = repository.getQuotes(assetIds)) {
+        is MarketApiResult.Success -> QuoteLoadResult(
+            quotes = result.value,
+            isStale = result.isStale,
+        )
+        else -> {
+            val quotes = mutableListOf<QuoteDto>()
+            val failedIds = mutableListOf<String>()
+            var hasStaleQuote = false
+
+            assetIds.forEach { assetId ->
+                when (val singleResult = repository.getQuotes(listOf(assetId))) {
+                    is MarketApiResult.Success -> {
+                        quotes += singleResult.value
+                        hasStaleQuote = hasStaleQuote || singleResult.isStale
+                    }
+                    else -> failedIds += assetId
+                }
+            }
+
+            QuoteLoadResult(
+                quotes = quotes,
+                isStale = hasStaleQuote || quotes.isNotEmpty(),
+                warning = if (quotes.isEmpty()) {
+                    result.toUserMessage("quotes")
+                } else {
+                    unavailableQuotesMessage(failedIds)
+                },
+            )
+        }
+    }
+}
+
+private fun unavailableQuotesMessage(failedIds: List<String>): String =
+    if (failedIds.isEmpty()) {
+        "Some quotes are unavailable."
+    } else {
+        "Unavailable: ${failedIds.take(3).joinToString(", ")}"
+    }
 
 private fun MarketApiResult<*>.toUserMessage(resource: String): String =
     when (this) {
