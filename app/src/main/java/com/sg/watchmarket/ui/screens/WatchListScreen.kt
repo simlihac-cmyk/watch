@@ -227,14 +227,15 @@ private fun WatchList(
 ) {
     ScalingLazyColumn(
         modifier = modifier.fillMaxSize(),
+        autoCentering = null,
         contentPadding = PaddingValues(
-            start = 24.dp,
-            top = 34.dp,
-            end = 24.dp,
-            bottom = 24.dp,
+            start = 12.dp,
+            top = 52.dp,
+            end = 12.dp,
+            bottom = 18.dp,
         ),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(7.dp),
+        verticalArrangement = Arrangement.spacedBy(5.dp),
     ) {
         item {
             WatchListHeader(onSearchRequested = onSearchRequested)
@@ -269,8 +270,8 @@ private fun WatchListHeader(
 ) {
     Box(
         modifier = modifier
-            .fillMaxWidth(0.94f)
-            .heightIn(min = 34.dp),
+            .fillMaxWidth(0.96f)
+            .heightIn(min = 28.dp),
         contentAlignment = Alignment.Center,
     ) {
         Text(
@@ -307,47 +308,38 @@ private fun WatchListRow(
 
     Box(
         modifier = modifier
-            .fillMaxWidth(0.96f)
-            .heightIn(min = 62.dp)
-            .clip(RoundedCornerShape(22.dp))
+            .fillMaxWidth(0.98f)
+            .heightIn(min = 42.dp)
+            .clip(RoundedCornerShape(18.dp))
             .background(MaterialTheme.colors.surface)
             .clickable(role = Role.Button, onClick = onClick)
-            .padding(horizontal = 13.dp, vertical = 10.dp),
+            .padding(horizontal = 11.dp, vertical = 7.dp),
     ) {
-        Column(
+        Row(
             modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(4.dp),
+            horizontalArrangement = Arrangement.spacedBy(7.dp),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(
-                    text = compactAssetDisplay(item.display),
-                    modifier = Modifier.weight(1f),
-                    style = MaterialTheme.typography.body1,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-                ChangeBadge(
-                    text = formatChangeRate(item.changeRate24h),
-                    color = changeColor,
-                )
-            }
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(
-                    text = "${formatPrice(item.price, item.currency)} ${item.currency}",
-                    modifier = Modifier.weight(1f),
-                    style = MaterialTheme.typography.caption2,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-            }
+            Text(
+                text = compactAssetDisplay(item.display),
+                modifier = Modifier.weight(0.8f),
+                style = MaterialTheme.typography.body2,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+            Text(
+                text = "${formatPrice(item.price, item.currency)} ${item.currency}",
+                modifier = Modifier.weight(1.35f),
+                color = Color(0xFFE5E7EB),
+                style = MaterialTheme.typography.caption1,
+                textAlign = TextAlign.End,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+            ChangeBadge(
+                text = formatChangeRate(item.changeRate24h),
+                color = changeColor,
+            )
         }
     }
 }
@@ -361,9 +353,9 @@ private fun ChangeBadge(
     Text(
         text = text,
         modifier = modifier
-            .clip(RoundedCornerShape(10.dp))
+            .clip(RoundedCornerShape(9.dp))
             .background(color.copy(alpha = 0.16f))
-            .padding(horizontal = 7.dp, vertical = 3.dp),
+            .padding(horizontal = 5.dp, vertical = 2.dp),
         color = color,
         style = MaterialTheme.typography.caption2,
         maxLines = 1,
