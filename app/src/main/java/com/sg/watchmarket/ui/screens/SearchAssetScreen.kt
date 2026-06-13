@@ -254,7 +254,7 @@ private fun SearchInput(
             decorationBox = { innerTextField ->
                 if (query.isBlank()) {
                     Text(
-                        text = "SPCX",
+                        text = "BTC",
                         color = Color(0xFF748096),
                         style = MaterialTheme.typography.body1,
                         maxLines = 1,

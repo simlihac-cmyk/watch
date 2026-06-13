@@ -35,7 +35,7 @@ The watch app uses Retrofit to call only the FastAPI server:
 
 ```text
 GET /v1/assets
-GET /v1/search?q=SPCX
+GET /v1/search?q=BTC
 POST /v1/watchlist
 GET /v1/quotes?ids=BTC,ETH
 GET /v1/candles?id=BTC&tf=5m&limit=120
@@ -83,13 +83,22 @@ The tile opens the main app when tapped. It does not call Binance, KIS, or any p
 
 Use the `+` button on the watch list to search and add assets. The watch sends the query only to the FastAPI server.
 
-Supported MVP search inputs:
+The current MVP is intentionally crypto-only:
 
 - Crypto ids already configured on the server, such as `BTC` or `ETH`.
-- Korean stock codes such as `005930`.
-- US tickers such as `AAPL` or `SPCX`.
-- Exact overseas exchange inputs such as `NYSE:SPCX`.
 
-The server stores selected dynamic assets in its SQLite watchlist. The watch app still never talks directly to Binance, KIS, or other providers.
+Stock search/add can be enabled later on the server after choosing and configuring a stock data provider. The watch app still never talks directly to Binance, KIS, or other providers.
+
+## Price Alerts
+
+The debug app schedules a local Wear OS price-alert job when opened. It checks the FastAPI server for configured Binance crypto assets and sends a watch notification when an asset's 24h change crosses:
+
+- 5%
+- 10%
+- 15%
+
+Alerts are based on the absolute 24h change rate, so both sharp gains and drops can notify. Each asset/threshold pair can notify only once per local calendar day; the record resets after midnight on the watch.
+
+The app requests Android notification permission on first launch. If notifications are denied, alerts are not shown.
 
 For the full real-device debug workflow, including Cloudflare HTTPS setup checks, token configuration, wireless ADB, and logcat commands, see [../docs/wear-debugging.md](../docs/wear-debugging.md).

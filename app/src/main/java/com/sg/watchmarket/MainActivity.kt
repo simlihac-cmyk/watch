@@ -1,5 +1,8 @@
 package com.sg.watchmarket
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
@@ -10,6 +13,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.wear.compose.material.MaterialTheme
+import com.sg.watchmarket.alerts.PriceAlertScheduler
 import com.sg.watchmarket.ui.screens.AssetDetailScreen
 import com.sg.watchmarket.ui.screens.SearchAssetScreen
 import com.sg.watchmarket.ui.screens.WatchListScreen
@@ -17,9 +21,29 @@ import com.sg.watchmarket.ui.screens.WatchListScreen
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        requestNotificationPermissionIfNeeded()
+        PriceAlertScheduler.schedule(this)
+        PriceAlertScheduler.runOnce(this)
         setContent {
             WatchMarketApp()
         }
+    }
+
+    private fun requestNotificationPermissionIfNeeded() {
+        if (
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) !=
+            PackageManager.PERMISSION_GRANTED
+        ) {
+            requestPermissions(
+                arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+                NotificationPermissionRequestCode,
+            )
+        }
+    }
+
+    private companion object {
+        const val NotificationPermissionRequestCode = 2001
     }
 }
 

@@ -48,43 +48,8 @@ class FakeMarketRepository : MarketRepository {
             listOf(asset.id, asset.display, asset.symbol, asset.currency)
                 .any { it.uppercase().contains(normalizedQuery) }
         }
-        val inferredAssets = when {
-            normalizedQuery.matches(Regex("^\\d{6}$")) -> AssetDto(
-                id = "KR_$normalizedQuery",
-                display = normalizedQuery,
-                provider = "kis_domestic",
-                symbol = normalizedQuery,
-                currency = "KRW",
-            ).let(::listOf)
-            normalizedQuery.matches(Regex("^[A-Z][A-Z0-9.\\-]{0,9}$")) -> listOf(
-                AssetDto(
-                    id = normalizedQuery,
-                    display = normalizedQuery,
-                    provider = "kis_overseas",
-                    symbol = "NASDAQ:$normalizedQuery",
-                    currency = "USD",
-                ),
-                AssetDto(
-                    id = "${normalizedQuery}_NYS",
-                    display = "$normalizedQuery NYSE",
-                    provider = "kis_overseas",
-                    symbol = "NYSE:$normalizedQuery",
-                    currency = "USD",
-                ),
-                AssetDto(
-                    id = "${normalizedQuery}_AMS",
-                    display = "$normalizedQuery AMEX",
-                    provider = "kis_overseas",
-                    symbol = "AMEX:$normalizedQuery",
-                    currency = "USD",
-                ),
-            )
-            else -> emptyList()
-        }
 
-        return MarketApiResult.Success(
-            configuredMatches + inferredAssets,
-        )
+        return MarketApiResult.Success(configuredMatches)
     }
 
     override suspend fun addAsset(asset: AssetDto): MarketApiResult<AssetDto> {
@@ -104,36 +69,15 @@ class FakeMarketRepository : MarketRepository {
             AssetDto(
                 id = "BTC",
                 display = "BTC/USDT",
-                provider = "server",
+                provider = "binance",
                 symbol = "BTCUSDT",
                 currency = "USDT",
             ),
             AssetDto(
                 id = "ETH",
                 display = "ETH/USDT",
-                provider = "server",
+                provider = "binance",
                 symbol = "ETHUSDT",
-                currency = "USDT",
-            ),
-            AssetDto(
-                id = "KR_005930",
-                display = "삼성전자우선주",
-                provider = "server",
-                symbol = "005930",
-                currency = "KRW",
-            ),
-            AssetDto(
-                id = "BRK_B",
-                display = "Berkshire Hathaway Class B",
-                provider = "server",
-                symbol = "NYSE:BRK.B",
-                currency = "USD",
-            ),
-            AssetDto(
-                id = "DOGE",
-                display = "DOGE/USDT",
-                provider = "server",
-                symbol = "DOGEUSDT",
                 currency = "USDT",
             ),
         )
@@ -153,30 +97,6 @@ class FakeMarketRepository : MarketRepository {
                 currency = "USDT",
                 price = 3450.34,
                 changeRate24h = -0.0062,
-                timestamp = 1710000000000,
-            ),
-            QuoteDto(
-                id = "KR_005930",
-                display = "삼성전자우선주",
-                currency = "KRW",
-                price = 73500.0,
-                changeRate24h = 0.0124,
-                timestamp = 1710000000000,
-            ),
-            QuoteDto(
-                id = "BRK_B",
-                display = "Berkshire Hathaway Class B",
-                currency = "USD",
-                price = 418.1234,
-                changeRate24h = 0.0012,
-                timestamp = 1710000000000,
-            ),
-            QuoteDto(
-                id = "DOGE",
-                display = "DOGE/USDT",
-                currency = "USDT",
-                price = 0.00345678,
-                changeRate24h = -0.021,
                 timestamp = 1710000000000,
             ),
         )

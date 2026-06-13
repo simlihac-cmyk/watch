@@ -603,8 +603,8 @@ private val DetailContentPadding = PaddingValues(
 private fun AssetDetailContentPreview() {
     MaterialTheme {
         AssetDetailContent(
-            assetId = "KR_005930",
-            display = "삼성전자우선주",
+            assetId = "BTC",
+            display = "BTC/USDT",
             selectedTimeframe = "5m",
             state = AssetDetailUiState.Loaded(
                 data = previewDetailData,
@@ -625,8 +625,8 @@ private fun AssetDetailContentPreview() {
 private fun AssetDetailErrorContentPreview() {
     MaterialTheme {
         AssetDetailContent(
-            assetId = "KR_005930",
-            display = "삼성전자우선주",
+            assetId = "BTC",
+            display = "BTC/USDT",
             selectedTimeframe = "1h",
             state = AssetDetailUiState.Error(
                 message = "Could not load candles: Unsupported timeframe: 1h.",
@@ -639,11 +639,11 @@ private fun AssetDetailErrorContentPreview() {
 }
 
 private val previewDetailData = AssetDetailData(
-    assetId = "KR_005930",
-    display = "삼성전자우선주",
+    assetId = "BTC",
+    display = "BTC/USDT",
     timeframe = "5m",
-    currency = "KRW",
-    latestClose = 73500.0,
+    currency = "USDT",
+    latestClose = 65020.0,
     latestTimestamp = 1710000000000,
     candleCount = 60,
     candles = listOf(

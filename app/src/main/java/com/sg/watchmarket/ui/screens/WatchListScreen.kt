@@ -606,25 +606,4 @@ private val previewItems = listOf(
         currency = "USDT",
         changeRate24h = -0.0062,
     ),
-    WatchListItem(
-        id = "KR_005930",
-        display = "삼성전자우선주",
-        price = 73500.0,
-        currency = "KRW",
-        changeRate24h = 0.0124,
-    ),
-    WatchListItem(
-        id = "BRK_B",
-        display = "Berkshire Hathaway Class B",
-        price = 418.1234,
-        currency = "USD",
-        changeRate24h = 0.0012,
-    ),
-    WatchListItem(
-        id = "DOGE",
-        display = "DOGE/USDT",
-        price = 0.00345678,
-        currency = "USDT",
-        changeRate24h = -0.021,
-    ),
 )
