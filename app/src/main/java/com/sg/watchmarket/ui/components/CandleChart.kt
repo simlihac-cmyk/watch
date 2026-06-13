@@ -26,13 +26,14 @@ import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 
-private const val MaxRenderedCandles = 120
+private const val MaxRenderedCandles = 60
 
 @Composable
 fun CandleChart(
     candles: List<CandleDto>,
     selectedTimeframe: String,
     modifier: Modifier = Modifier,
+    heightDp: Int = 104,
 ) {
     val visibleCandles = remember(candles) {
         candles
@@ -43,7 +44,7 @@ fun CandleChart(
     Box(
         modifier = modifier
             .fillMaxWidth(0.96f)
-            .height(96.dp)
+            .height(heightDp.dp)
             .clip(RoundedCornerShape(22.dp))
             .background(MaterialTheme.colors.surface),
         contentAlignment = Alignment.Center,

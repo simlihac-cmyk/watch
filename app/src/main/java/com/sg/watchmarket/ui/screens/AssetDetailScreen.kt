@@ -21,7 +21,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
@@ -42,12 +41,10 @@ import com.sg.watchmarket.data.repository.MarketRepository
 import com.sg.watchmarket.state.AssetDetailData
 import com.sg.watchmarket.state.AssetDetailUiState
 import com.sg.watchmarket.ui.components.CandleChart
-import java.text.SimpleDateFormat
-import java.util.Date
 import java.util.Locale
 import kotlin.math.abs
 
-private const val CandleLimit = 120
+private const val CandleLimit = 60
 private val SupportedTimeframes = listOf("5m", "1h", "1d", "1w")
 
 @Composable
@@ -226,6 +223,7 @@ private fun DetailLoading(
 ) {
     ScalingLazyColumn(
         modifier = modifier.fillMaxSize(),
+        autoCentering = null,
         contentPadding = DetailContentPadding,
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(7.dp),
@@ -264,9 +262,10 @@ private fun DetailLoaded(
 ) {
     ScalingLazyColumn(
         modifier = modifier.fillMaxSize(),
+        autoCentering = null,
         contentPadding = DetailContentPadding,
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(7.dp),
     ) {
         item {
             DetailHeader(
@@ -275,7 +274,11 @@ private fun DetailLoaded(
             )
         }
         item {
-            PriceSummary(data = data)
+            CandleChart(
+                candles = data.candles,
+                selectedTimeframe = selectedTimeframe,
+                heightDp = 124,
+            )
         }
         if (data.isStale) {
             item {
@@ -293,13 +296,7 @@ private fun DetailLoaded(
             )
         }
         item {
-            CandleChart(
-                candles = data.candles,
-                selectedTimeframe = selectedTimeframe,
-            )
-        }
-        item {
-            DetailCompactStats(data = data)
+            PriceSummary(data = data)
         }
     }
 }
@@ -332,6 +329,7 @@ private fun DetailError(
 
     ScalingLazyColumn(
         modifier = modifier.fillMaxSize(),
+        autoCentering = null,
         contentPadding = DetailContentPadding,
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(7.dp),
@@ -406,9 +404,8 @@ private fun PriceSummary(
             .fillMaxWidth(0.94f)
             .clip(RoundedCornerShape(20.dp))
             .background(MaterialTheme.colors.surface)
-            .padding(horizontal = 12.dp, vertical = 10.dp),
+            .padding(horizontal = 12.dp, vertical = 9.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(2.dp),
     ) {
         Text(
             text = "${formatPrice(data.latestClose, data.currency)} ${data.currency}",
@@ -416,13 +413,6 @@ private fun PriceSummary(
             textAlign = TextAlign.Center,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
-        )
-        Text(
-            text = data.timeframe,
-            color = Color(0xFFB6C2D0),
-            style = MaterialTheme.typography.caption2,
-            textAlign = TextAlign.Center,
-            maxLines = 1,
         )
     }
 }
@@ -470,39 +460,6 @@ private fun TimeframeSelector(
                 )
             }
         }
-    }
-}
-
-@Composable
-private fun DetailCompactStats(
-    data: AssetDetailData,
-    modifier: Modifier = Modifier,
-) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth(0.94f)
-            .clip(RoundedCornerShape(16.dp))
-            .background(MaterialTheme.colors.surface)
-            .padding(horizontal = 12.dp, vertical = 8.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(
-            text = formatTimestamp(data.latestTimestamp),
-            modifier = Modifier.weight(1.3f),
-            color = Color(0xFFB6C2D0),
-            style = MaterialTheme.typography.caption2,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
-        Text(
-            text = data.candleCount.toString(),
-            modifier = Modifier.weight(1f),
-            style = MaterialTheme.typography.caption2,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            textAlign = TextAlign.End,
-        )
     }
 }
 
@@ -624,9 +581,6 @@ private fun formatPrice(
     return String.format(Locale.US, "%,.${decimals}f", price)
 }
 
-private fun formatTimestamp(timestamp: Long): String =
-    SimpleDateFormat("MM-dd HH:mm", Locale.US).format(Date(timestamp))
-
 private fun compactAssetDisplay(display: String): String =
     display
         .substringBefore("/")
@@ -634,10 +588,10 @@ private fun compactAssetDisplay(display: String): String =
         .ifBlank { display }
 
 private val DetailContentPadding = PaddingValues(
-    start = 24.dp,
-    top = 34.dp,
-    end = 24.dp,
-    bottom = 24.dp,
+    start = 16.dp,
+    top = 42.dp,
+    end = 16.dp,
+    bottom = 20.dp,
 )
 
 @Preview(
@@ -691,7 +645,7 @@ private val previewDetailData = AssetDetailData(
     currency = "KRW",
     latestClose = 73500.0,
     latestTimestamp = 1710000000000,
-    candleCount = 120,
+    candleCount = 60,
     candles = listOf(
         com.sg.watchmarket.data.dto.CandleDto(
             t = 1710000000000,
