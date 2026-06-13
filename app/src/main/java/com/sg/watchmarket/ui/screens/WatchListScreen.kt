@@ -271,43 +271,76 @@ private fun WatchListRow(
     Box(
         modifier = modifier
             .fillMaxWidth(0.86f)
-            .heightIn(min = 58.dp)
+            .heightIn(min = 62.dp)
             .clip(RoundedCornerShape(22.dp))
             .background(MaterialTheme.colors.surface)
             .clickable(role = Role.Button, onClick = onClick)
-            .padding(horizontal = 12.dp, vertical = 9.dp),
+            .padding(horizontal = 13.dp, vertical = 10.dp),
     ) {
-        Row(
+        Column(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(7.dp),
-            verticalAlignment = Alignment.CenterVertically,
+            verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(2.dp),
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
                     text = item.display,
+                    modifier = Modifier.weight(1f),
                     style = MaterialTheme.typography.body1,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
+                ChangeBadge(
+                    text = formatChangeRate(item.changeRate24h),
+                    color = changeColor,
+                )
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
                 Text(
                     text = "${formatPrice(item.price, item.currency)} ${item.currency}",
+                    modifier = Modifier.weight(1f),
                     style = MaterialTheme.typography.caption2,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
+                if (item.isStale) {
+                    Text(
+                        text = "cached",
+                        color = Color(0xFFB6C2D0),
+                        style = MaterialTheme.typography.caption2,
+                        maxLines = 1,
+                        textAlign = TextAlign.End,
+                    )
+                }
             }
-            Text(
-                text = formatChangeRate(item.changeRate24h),
-                color = changeColor,
-                style = MaterialTheme.typography.caption2,
-                maxLines = 1,
-                textAlign = TextAlign.End,
-            )
         }
     }
+}
+
+@Composable
+private fun ChangeBadge(
+    text: String,
+    color: Color,
+    modifier: Modifier = Modifier,
+) {
+    Text(
+        text = text,
+        modifier = modifier
+            .clip(RoundedCornerShape(10.dp))
+            .background(color.copy(alpha = 0.16f))
+            .padding(horizontal = 7.dp, vertical = 3.dp),
+        color = color,
+        style = MaterialTheme.typography.caption2,
+        maxLines = 1,
+        textAlign = TextAlign.Center,
+    )
 }
 
 @Composable

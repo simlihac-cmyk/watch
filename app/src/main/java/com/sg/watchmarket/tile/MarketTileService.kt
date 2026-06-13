@@ -78,7 +78,7 @@ private fun MaterialScope.marketTileLayout(
     primaryLayout(
         titleSlot = {
             text(
-                text = "Watch Market".layoutString,
+                text = "Market glance".layoutString,
                 typography = TITLE_SMALL,
             )
         },
@@ -154,9 +154,19 @@ private fun formatTilePrice(
     currency: String,
 ): String {
     val absolutePrice = abs(price)
+    val sign = if (price < 0.0) "-" else ""
+    if (absolutePrice >= 1_000_000.0) {
+        return String.format(Locale.US, "%s%.2fM", sign, absolutePrice / 1_000_000.0)
+    }
+    if (absolutePrice >= 10_000.0) {
+        return String.format(Locale.US, "%s%.1fK", sign, absolutePrice / 1_000.0)
+    }
+    if (absolutePrice >= 1_000.0) {
+        return String.format(Locale.US, "%s%.2fK", sign, absolutePrice / 1_000.0)
+    }
+
     val decimals = when {
         currency.equals("KRW", ignoreCase = true) -> 0
-        absolutePrice >= 1_000.0 -> 0
         absolutePrice >= 1.0 -> 2
         absolutePrice >= 0.01 -> 4
         absolutePrice > 0.0 -> 8

@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
@@ -266,7 +267,7 @@ private fun DetailLoaded(
         modifier = modifier.fillMaxSize(),
         contentPadding = DetailContentPadding,
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(7.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         item {
             DetailHeader(
@@ -276,10 +277,7 @@ private fun DetailLoaded(
             )
         }
         item {
-            TimeframeSelector(
-                selectedTimeframe = selectedTimeframe,
-                onTimeframeSelected = onTimeframeSelected,
-            )
+            PriceSummary(data = data)
         }
         if (data.isStale) {
             item {
@@ -291,13 +289,19 @@ private fun DetailLoaded(
             }
         }
         item {
+            TimeframeSelector(
+                selectedTimeframe = selectedTimeframe,
+                onTimeframeSelected = onTimeframeSelected,
+            )
+        }
+        item {
             CandleChart(
                 candles = data.candles,
                 selectedTimeframe = selectedTimeframe,
             )
         }
         item {
-            DetailMetricGrid(data = data)
+            DetailCompactStats(data = data)
         }
     }
 }
@@ -365,14 +369,16 @@ private fun DetailHeader(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Row(
-        modifier = modifier.fillMaxWidth(0.82f),
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
-        verticalAlignment = Alignment.CenterVertically,
+    Box(
+        modifier = modifier
+            .fillMaxWidth(0.84f)
+            .heightIn(min = 42.dp),
+        contentAlignment = Alignment.Center,
     ) {
         Text(
             text = "Back",
             modifier = Modifier
+                .align(Alignment.CenterStart)
                 .clickable(role = Role.Button, onClick = onBack)
                 .padding(horizontal = 4.dp, vertical = 4.dp),
             color = MaterialTheme.colors.primary,
@@ -380,7 +386,7 @@ private fun DetailHeader(
             maxLines = 1,
         )
         Column(
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.fillMaxWidth(0.72f),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Text(
@@ -398,6 +404,37 @@ private fun DetailHeader(
                 overflow = TextOverflow.Ellipsis,
             )
         }
+    }
+}
+
+@Composable
+private fun PriceSummary(
+    data: AssetDetailData,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth(0.82f)
+            .clip(RoundedCornerShape(20.dp))
+            .background(MaterialTheme.colors.surface)
+            .padding(horizontal = 12.dp, vertical = 10.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(2.dp),
+    ) {
+        Text(
+            text = "${formatPrice(data.latestClose, data.currency)} ${data.currency}",
+            style = MaterialTheme.typography.title3,
+            textAlign = TextAlign.Center,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+        Text(
+            text = "${data.timeframe} close",
+            color = Color(0xFFB6C2D0),
+            style = MaterialTheme.typography.caption2,
+            textAlign = TextAlign.Center,
+            maxLines = 1,
+        )
     }
 }
 
@@ -448,59 +485,31 @@ private fun TimeframeSelector(
 }
 
 @Composable
-private fun DetailMetricGrid(
+private fun DetailCompactStats(
     data: AssetDetailData,
     modifier: Modifier = Modifier,
 ) {
-    Column(
+    Row(
         modifier = modifier
             .fillMaxWidth(0.82f)
             .clip(RoundedCornerShape(16.dp))
             .background(MaterialTheme.colors.surface)
-            .padding(horizontal = 12.dp, vertical = 9.dp),
-        verticalArrangement = Arrangement.spacedBy(5.dp),
-    ) {
-        MetricRow(
-            label = "TF",
-            value = data.timeframe,
-        )
-        MetricRow(
-            label = "Close",
-            value = "${formatPrice(data.latestClose, data.currency)} ${data.currency}",
-        )
-        MetricRow(
-            label = "Time",
-            value = formatTimestamp(data.latestTimestamp),
-        )
-        MetricRow(
-            label = "Candles",
-            value = data.candleCount.toString(),
-        )
-    }
-}
-
-@Composable
-private fun MetricRow(
-    label: String,
-    value: String,
-    modifier: Modifier = Modifier,
-) {
-    Row(
-        modifier = modifier.fillMaxWidth(),
+            .padding(horizontal = 12.dp, vertical = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
-            text = label,
-            modifier = Modifier.weight(1f),
+            text = formatTimestamp(data.latestTimestamp),
+            modifier = Modifier.weight(1.3f),
             color = Color(0xFFB6C2D0),
             style = MaterialTheme.typography.caption2,
             maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
         )
         Text(
-            text = value,
-            modifier = Modifier.weight(2f),
-            style = MaterialTheme.typography.caption1,
+            text = "${data.candleCount} candles",
+            modifier = Modifier.weight(1f),
+            style = MaterialTheme.typography.caption2,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             textAlign = TextAlign.End,

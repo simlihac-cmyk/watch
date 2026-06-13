@@ -42,8 +42,8 @@ fun CandleChart(
 
     Box(
         modifier = modifier
-            .fillMaxWidth(0.88f)
-            .height(88.dp)
+            .fillMaxWidth(0.9f)
+            .height(96.dp)
             .clip(RoundedCornerShape(22.dp))
             .background(MaterialTheme.colors.surface),
         contentAlignment = Alignment.Center,
@@ -114,6 +114,14 @@ fun CandleChart(
                 return (topPadding + ratio * chartHeight)
                     .coerceIn(topPadding, topPadding + chartHeight)
             }
+
+            val latestCloseY = priceToY(visibleCandles.last().c)
+            drawLine(
+                color = flatColor.copy(alpha = 0.2f),
+                start = Offset(leftPadding, latestCloseY),
+                end = Offset(leftPadding + chartWidth, latestCloseY),
+                strokeWidth = 1f,
+            )
 
             val count = visibleCandles.size
             val slotWidth = chartWidth / count
