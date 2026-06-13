@@ -26,6 +26,12 @@ interface MarketRepository {
         tf: String,
         limit: Int,
     ): MarketApiResult<CandleResponseDto>
+
+    suspend fun searchAssets(query: String): MarketApiResult<List<AssetDto>>
+
+    suspend fun addAsset(asset: AssetDto): MarketApiResult<AssetDto>
+
+    suspend fun removeAsset(id: String): MarketApiResult<Unit>
 }
 
 class FastApiMarketRepository(
@@ -78,6 +84,15 @@ class FastApiMarketRepository(
             else -> result
         }
     }
+
+    override suspend fun searchAssets(query: String): MarketApiResult<List<AssetDto>> =
+        safeApiCall { api.searchAssets(query.trim()) }
+
+    override suspend fun addAsset(asset: AssetDto): MarketApiResult<AssetDto> =
+        safeApiCall { api.addWatchlistAsset(asset) }
+
+    override suspend fun removeAsset(id: String): MarketApiResult<Unit> =
+        safeUnitApiCall { api.deleteWatchlistAsset(id.uppercase(Locale.US)) }
 }
 
 private suspend fun <T : Any> safeApiCall(
@@ -89,6 +104,30 @@ private suspend fun <T : Any> safeApiCall(
         throw exc
     } catch (exc: MalformedJsonException) {
         MarketApiResult.InvalidResponse(exc.message ?: "Malformed JSON response")
+    } catch (exc: IOException) {
+        MarketApiResult.NetworkFailure(exc.message ?: "Network request failed")
+    } catch (exc: JsonParseException) {
+        MarketApiResult.InvalidResponse(exc.message ?: "Invalid JSON response")
+    } catch (exc: IllegalStateException) {
+        MarketApiResult.InvalidResponse(exc.message ?: "Invalid response")
+    }
+}
+
+private suspend fun safeUnitApiCall(
+    call: suspend () -> Response<Unit>,
+): MarketApiResult<Unit> {
+    return try {
+        val response = call()
+        when {
+            response.code() == 401 -> MarketApiResult.Unauthorized
+            response.isSuccessful -> MarketApiResult.Success(Unit)
+            else -> MarketApiResult.HttpFailure(
+                statusCode = response.code(),
+                message = response.fastApiErrorMessage(),
+            )
+        }
+    } catch (exc: CancellationException) {
+        throw exc
     } catch (exc: IOException) {
         MarketApiResult.NetworkFailure(exc.message ?: "Network request failed")
     } catch (exc: JsonParseException) {

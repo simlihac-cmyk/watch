@@ -11,6 +11,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.wear.compose.material.MaterialTheme
 import com.sg.watchmarket.ui.screens.AssetDetailScreen
+import com.sg.watchmarket.ui.screens.SearchAssetScreen
 import com.sg.watchmarket.ui.screens.WatchListScreen
 
 class MainActivity : ComponentActivity() {
@@ -25,16 +26,32 @@ class MainActivity : ComponentActivity() {
 @Composable
 private fun WatchMarketApp() {
     var selectedAssetId by rememberSaveable { mutableStateOf<String?>(null) }
+    var isSearching by rememberSaveable { mutableStateOf(false) }
+    var listReloadKey by rememberSaveable { mutableStateOf(0) }
 
-    BackHandler(enabled = selectedAssetId != null) {
-        selectedAssetId = null
+    BackHandler(enabled = selectedAssetId != null || isSearching) {
+        if (isSearching) {
+            isSearching = false
+        } else {
+            selectedAssetId = null
+        }
     }
 
     MaterialTheme {
         val assetId = selectedAssetId
-        if (assetId == null) {
+        if (isSearching) {
+            SearchAssetScreen(
+                onBack = { isSearching = false },
+                onAssetAdded = {
+                    isSearching = false
+                    listReloadKey += 1
+                },
+            )
+        } else if (assetId == null) {
             WatchListScreen(
                 onAssetSelected = { selectedAssetId = it },
+                onSearchRequested = { isSearching = true },
+                reloadKey = listReloadKey,
             )
         } else {
             AssetDetailScreen(

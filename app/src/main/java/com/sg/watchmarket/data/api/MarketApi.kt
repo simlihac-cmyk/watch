@@ -3,8 +3,12 @@ package com.sg.watchmarket.data.api
 import com.sg.watchmarket.data.dto.AssetDto
 import com.sg.watchmarket.data.dto.CandleResponseDto
 import com.sg.watchmarket.data.dto.QuoteDto
+import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.Response
 import retrofit2.http.GET
+import retrofit2.http.POST
+import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface MarketApi {
@@ -22,4 +26,19 @@ interface MarketApi {
         @Query("tf") tf: String,
         @Query("limit") limit: Int,
     ): Response<CandleResponseDto>
+
+    @GET("v1/search")
+    suspend fun searchAssets(
+        @Query("q") query: String,
+    ): Response<List<AssetDto>>
+
+    @POST("v1/watchlist")
+    suspend fun addWatchlistAsset(
+        @Body asset: AssetDto,
+    ): Response<AssetDto>
+
+    @DELETE("v1/watchlist/{id}")
+    suspend fun deleteWatchlistAsset(
+        @Path("id") id: String,
+    ): Response<Unit>
 }

@@ -6,8 +6,10 @@ import com.sg.watchmarket.data.dto.CandleResponseDto
 import com.sg.watchmarket.data.dto.QuoteDto
 
 class FakeMarketRepository : MarketRepository {
+    private val dynamicAssets = mutableListOf<AssetDto>()
+
     override suspend fun getAssets(): MarketApiResult<List<AssetDto>> =
-        MarketApiResult.Success(fakeAssets)
+        MarketApiResult.Success(fakeAssets + dynamicAssets)
 
     override suspend fun getQuotes(ids: List<String>): MarketApiResult<List<QuoteDto>> {
         val requestedIds = ids.map { it.uppercase() }.toSet()
@@ -34,6 +36,67 @@ class FakeMarketRepository : MarketRepository {
                 candles = fakeCandles.take(limit.coerceAtLeast(0)),
             ),
         )
+    }
+
+    override suspend fun searchAssets(query: String): MarketApiResult<List<AssetDto>> {
+        val normalizedQuery = query.trim().uppercase()
+        if (normalizedQuery.isBlank()) {
+            return MarketApiResult.Success(emptyList())
+        }
+
+        val configuredMatches = fakeAssets.filter { asset ->
+            listOf(asset.id, asset.display, asset.symbol, asset.currency)
+                .any { it.uppercase().contains(normalizedQuery) }
+        }
+        val inferredAssets = when {
+            normalizedQuery.matches(Regex("^\\d{6}$")) -> AssetDto(
+                id = "KR_$normalizedQuery",
+                display = normalizedQuery,
+                provider = "kis_domestic",
+                symbol = normalizedQuery,
+                currency = "KRW",
+            ).let(::listOf)
+            normalizedQuery.matches(Regex("^[A-Z][A-Z0-9.\\-]{0,9}$")) -> listOf(
+                AssetDto(
+                    id = normalizedQuery,
+                    display = normalizedQuery,
+                    provider = "kis_overseas",
+                    symbol = "NASDAQ:$normalizedQuery",
+                    currency = "USD",
+                ),
+                AssetDto(
+                    id = "${normalizedQuery}_NYS",
+                    display = "$normalizedQuery NYSE",
+                    provider = "kis_overseas",
+                    symbol = "NYSE:$normalizedQuery",
+                    currency = "USD",
+                ),
+                AssetDto(
+                    id = "${normalizedQuery}_AMS",
+                    display = "$normalizedQuery AMEX",
+                    provider = "kis_overseas",
+                    symbol = "AMEX:$normalizedQuery",
+                    currency = "USD",
+                ),
+            )
+            else -> emptyList()
+        }
+
+        return MarketApiResult.Success(
+            configuredMatches + inferredAssets,
+        )
+    }
+
+    override suspend fun addAsset(asset: AssetDto): MarketApiResult<AssetDto> {
+        if ((fakeAssets + dynamicAssets).none { it.id.equals(asset.id, ignoreCase = true) }) {
+            dynamicAssets.add(asset.copy(id = asset.id.uppercase()))
+        }
+        return MarketApiResult.Success(asset)
+    }
+
+    override suspend fun removeAsset(id: String): MarketApiResult<Unit> {
+        dynamicAssets.removeAll { it.id.equals(id, ignoreCase = true) }
+        return MarketApiResult.Success(Unit)
     }
 
     private companion object {

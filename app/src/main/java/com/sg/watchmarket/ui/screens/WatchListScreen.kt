@@ -49,6 +49,8 @@ import kotlin.math.abs
 @Composable
 fun WatchListScreen(
     onAssetSelected: (String) -> Unit,
+    onSearchRequested: () -> Unit,
+    reloadKey: Int,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current.applicationContext
@@ -61,6 +63,8 @@ fun WatchListScreen(
     WatchListScreen(
         repository = repository,
         onAssetSelected = onAssetSelected,
+        onSearchRequested = onSearchRequested,
+        externalReloadKey = reloadKey,
         modifier = modifier,
     )
 }
@@ -69,6 +73,8 @@ fun WatchListScreen(
 fun WatchListScreen(
     repository: MarketRepository,
     onAssetSelected: (String) -> Unit,
+    onSearchRequested: () -> Unit,
+    externalReloadKey: Int = 0,
     modifier: Modifier = Modifier,
 ) {
     var state by remember { mutableStateOf<WatchListUiState>(WatchListUiState.Loading) }
@@ -143,7 +149,7 @@ fun WatchListScreen(
         )
     }
 
-    LaunchedEffect(repository, reloadKey) {
+    LaunchedEffect(repository, reloadKey, externalReloadKey) {
         loadWatchList()
     }
 
@@ -151,6 +157,7 @@ fun WatchListScreen(
         state = state,
         onRetry = { reloadKey += 1 },
         onAssetSelected = onAssetSelected,
+        onSearchRequested = onSearchRequested,
         modifier = modifier,
     )
 }
@@ -160,6 +167,7 @@ fun WatchListContent(
     state: WatchListUiState,
     onRetry: () -> Unit,
     onAssetSelected: (String) -> Unit,
+    onSearchRequested: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
@@ -177,6 +185,7 @@ fun WatchListContent(
                 isStale = state.isStale,
                 onRetry = onRetry,
                 onAssetSelected = onAssetSelected,
+                onSearchRequested = onSearchRequested,
                 modifier = modifier,
             )
 
@@ -196,6 +205,7 @@ fun WatchListContent(
                         errorMessage = state.message,
                         onRetry = onRetry,
                         onAssetSelected = onAssetSelected,
+                        onSearchRequested = onSearchRequested,
                         modifier = modifier,
                     )
                 }
@@ -211,6 +221,7 @@ private fun WatchList(
     isStale: Boolean,
     onRetry: () -> Unit,
     onAssetSelected: (String) -> Unit,
+    onSearchRequested: () -> Unit,
     modifier: Modifier = Modifier,
     errorMessage: String? = null,
 ) {
@@ -226,12 +237,7 @@ private fun WatchList(
         verticalArrangement = Arrangement.spacedBy(7.dp),
     ) {
         item {
-            Text(
-                text = "Market",
-                modifier = Modifier.fillMaxWidth(0.9f),
-                style = MaterialTheme.typography.title3,
-                textAlign = TextAlign.Center,
-            )
+            WatchListHeader(onSearchRequested = onSearchRequested)
         }
 
         if (isStale) {
@@ -253,6 +259,37 @@ private fun WatchList(
                 onClick = { onAssetSelected(item.id) },
             )
         }
+    }
+}
+
+@Composable
+private fun WatchListHeader(
+    onSearchRequested: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth(0.94f)
+            .heightIn(min = 34.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text = "Market",
+            style = MaterialTheme.typography.title3,
+            textAlign = TextAlign.Center,
+            maxLines = 1,
+        )
+        Text(
+            text = "+",
+            modifier = Modifier
+                .align(Alignment.CenterEnd)
+                .clickable(role = Role.Button, onClick = onSearchRequested)
+                .padding(horizontal = 8.dp, vertical = 3.dp),
+            color = MaterialTheme.colors.primary,
+            style = MaterialTheme.typography.title3,
+            maxLines = 1,
+            textAlign = TextAlign.Center,
+        )
     }
 }
 
@@ -484,6 +521,7 @@ private fun WatchListContentPreview() {
             state = WatchListUiState.Loaded(items = previewItems),
             onRetry = {},
             onAssetSelected = {},
+            onSearchRequested = {},
         )
     }
 }
@@ -503,6 +541,7 @@ private fun WatchListStaleContentPreview() {
             ),
             onRetry = {},
             onAssetSelected = {},
+            onSearchRequested = {},
         )
     }
 }

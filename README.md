@@ -35,6 +35,8 @@ The watch app uses Retrofit to call only the FastAPI server:
 
 ```text
 GET /v1/assets
+GET /v1/search?q=SPCX
+POST /v1/watchlist
 GET /v1/quotes?ids=BTC,ETH
 GET /v1/candles?id=BTC&tf=5m&limit=120
 ```
@@ -76,5 +78,18 @@ The debug APK includes a Wear OS Tile named `Market glance`. On the watch:
 4. Open the app once to load quotes; the tile then shows the last successful BTC and ETH quote cache.
 
 The tile opens the main app when tapped. It does not call Binance, KIS, or any provider directly.
+
+## Add Assets On The Watch
+
+Use the `+` button on the watch list to search and add assets. The watch sends the query only to the FastAPI server.
+
+Supported MVP search inputs:
+
+- Crypto ids already configured on the server, such as `BTC` or `ETH`.
+- Korean stock codes such as `005930`.
+- US tickers such as `AAPL` or `SPCX`.
+- Exact overseas exchange inputs such as `NYSE:SPCX`.
+
+The server stores selected dynamic assets in its SQLite watchlist. The watch app still never talks directly to Binance, KIS, or other providers.
 
 For the full real-device debug workflow, including Cloudflare HTTPS setup checks, token configuration, wireless ADB, and logcat commands, see [../docs/wear-debugging.md](../docs/wear-debugging.md).
