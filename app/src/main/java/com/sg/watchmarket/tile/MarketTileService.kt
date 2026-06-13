@@ -144,8 +144,9 @@ private fun tileSpacer(heightDp: Float): LayoutElementBuilders.LayoutElement =
 private fun QuoteDto.toTileLine(): String {
     val label = display
         .ifBlank { id }
-        .replace("/USDT", "")
-        .replace("/USD", "")
+        .substringBefore("/")
+        .trim()
+        .ifBlank { id }
     return "$label ${formatTilePrice(price, currency)} ${formatTileChange(changeRate24h)}"
 }
 

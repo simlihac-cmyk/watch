@@ -228,7 +228,7 @@ private fun WatchList(
         item {
             Text(
                 text = "Market",
-                modifier = Modifier.fillMaxWidth(0.72f),
+                modifier = Modifier.fillMaxWidth(0.9f),
                 style = MaterialTheme.typography.title3,
                 textAlign = TextAlign.Center,
             )
@@ -270,7 +270,7 @@ private fun WatchListRow(
 
     Box(
         modifier = modifier
-            .fillMaxWidth(0.86f)
+            .fillMaxWidth(0.96f)
             .heightIn(min = 62.dp)
             .clip(RoundedCornerShape(22.dp))
             .background(MaterialTheme.colors.surface)
@@ -287,7 +287,7 @@ private fun WatchListRow(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    text = item.display,
+                    text = compactAssetDisplay(item.display),
                     modifier = Modifier.weight(1f),
                     style = MaterialTheme.typography.body1,
                     maxLines = 1,
@@ -310,15 +310,6 @@ private fun WatchListRow(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
-                if (item.isStale) {
-                    Text(
-                        text = "cached",
-                        color = Color(0xFFB6C2D0),
-                        style = MaterialTheme.typography.caption2,
-                        maxLines = 1,
-                        textAlign = TextAlign.End,
-                    )
-                }
             }
         }
     }
@@ -352,7 +343,7 @@ private fun StatusPill(
 ) {
     Row(
         modifier = modifier
-            .fillMaxWidth(0.82f)
+            .fillMaxWidth(0.94f)
             .clip(RoundedCornerShape(16.dp))
             .background(MaterialTheme.colors.surface)
             .padding(horizontal = 12.dp, vertical = 7.dp),
@@ -474,6 +465,12 @@ private fun formatPrice(
 
 private fun formatChangeRate(changeRate: Double): String =
     String.format(Locale.US, "%+.2f%%", changeRate * 100.0)
+
+private fun compactAssetDisplay(display: String): String =
+    display
+        .substringBefore("/")
+        .trim()
+        .ifBlank { display }
 
 @Preview(
     device = "id:wearos_small_round",

@@ -42,7 +42,7 @@ fun CandleChart(
 
     Box(
         modifier = modifier
-            .fillMaxWidth(0.9f)
+            .fillMaxWidth(0.96f)
             .height(96.dp)
             .clip(RoundedCornerShape(22.dp))
             .background(MaterialTheme.colors.surface),

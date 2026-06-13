@@ -232,7 +232,6 @@ private fun DetailLoading(
     ) {
         item {
             DetailHeader(
-                assetId = assetId,
                 display = display,
                 onBack = onBack,
             )
@@ -271,7 +270,6 @@ private fun DetailLoaded(
     ) {
         item {
             DetailHeader(
-                assetId = data.assetId,
                 display = data.display,
                 onBack = onBack,
             )
@@ -340,7 +338,6 @@ private fun DetailError(
     ) {
         item {
             DetailHeader(
-                assetId = assetId,
                 display = display,
                 onBack = onBack,
             )
@@ -364,14 +361,13 @@ private fun DetailError(
 
 @Composable
 private fun DetailHeader(
-    assetId: String,
     display: String,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Box(
         modifier = modifier
-            .fillMaxWidth(0.84f)
+            .fillMaxWidth(0.94f)
             .heightIn(min = 42.dp),
         contentAlignment = Alignment.Center,
     ) {
@@ -386,19 +382,12 @@ private fun DetailHeader(
             maxLines = 1,
         )
         Column(
-            modifier = Modifier.fillMaxWidth(0.72f),
+            modifier = Modifier.fillMaxWidth(0.78f),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Text(
-                text = display,
+                text = compactAssetDisplay(display),
                 style = MaterialTheme.typography.body1,
-                textAlign = TextAlign.Center,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-            )
-            Text(
-                text = assetId,
-                style = MaterialTheme.typography.caption2,
                 textAlign = TextAlign.Center,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
@@ -414,7 +403,7 @@ private fun PriceSummary(
 ) {
     Column(
         modifier = modifier
-            .fillMaxWidth(0.82f)
+            .fillMaxWidth(0.94f)
             .clip(RoundedCornerShape(20.dp))
             .background(MaterialTheme.colors.surface)
             .padding(horizontal = 12.dp, vertical = 10.dp),
@@ -429,7 +418,7 @@ private fun PriceSummary(
             overflow = TextOverflow.Ellipsis,
         )
         Text(
-            text = "${data.timeframe} close",
+            text = data.timeframe,
             color = Color(0xFFB6C2D0),
             style = MaterialTheme.typography.caption2,
             textAlign = TextAlign.Center,
@@ -445,7 +434,7 @@ private fun TimeframeSelector(
     modifier: Modifier = Modifier,
 ) {
     Row(
-        modifier = modifier.fillMaxWidth(0.84f),
+        modifier = modifier.fillMaxWidth(0.94f),
         horizontalArrangement = Arrangement.spacedBy(4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -491,7 +480,7 @@ private fun DetailCompactStats(
 ) {
     Row(
         modifier = modifier
-            .fillMaxWidth(0.82f)
+            .fillMaxWidth(0.94f)
             .clip(RoundedCornerShape(16.dp))
             .background(MaterialTheme.colors.surface)
             .padding(horizontal = 12.dp, vertical = 8.dp),
@@ -507,7 +496,7 @@ private fun DetailCompactStats(
             overflow = TextOverflow.Ellipsis,
         )
         Text(
-            text = "${data.candleCount} candles",
+            text = data.candleCount.toString(),
             modifier = Modifier.weight(1f),
             style = MaterialTheme.typography.caption2,
             maxLines = 1,
@@ -526,7 +515,7 @@ private fun StatusPill(
 ) {
     Row(
         modifier = modifier
-            .fillMaxWidth(0.82f)
+            .fillMaxWidth(0.94f)
             .clip(RoundedCornerShape(16.dp))
             .background(MaterialTheme.colors.surface)
             .padding(horizontal = 12.dp, vertical = 7.dp),
@@ -562,7 +551,7 @@ private fun CenterText(
 ) {
     Column(
         modifier = modifier
-            .fillMaxWidth(0.82f)
+            .fillMaxWidth(0.94f)
             .padding(horizontal = 8.dp, vertical = 20.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -637,6 +626,12 @@ private fun formatPrice(
 
 private fun formatTimestamp(timestamp: Long): String =
     SimpleDateFormat("MM-dd HH:mm", Locale.US).format(Date(timestamp))
+
+private fun compactAssetDisplay(display: String): String =
+    display
+        .substringBefore("/")
+        .trim()
+        .ifBlank { display }
 
 private val DetailContentPadding = PaddingValues(
     start = 24.dp,
