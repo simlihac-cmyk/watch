@@ -295,7 +295,7 @@ private fun DetailLoaded(
             CandleChart(
                 candles = data.candles,
                 selectedTimeframe = selectedTimeframe,
-                heightDp = 124,
+                heightDp = 96,
             )
         }
         if (data.isStale) {

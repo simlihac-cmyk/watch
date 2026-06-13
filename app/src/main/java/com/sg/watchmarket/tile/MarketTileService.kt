@@ -7,6 +7,7 @@ import com.sg.watchmarket.MainActivity
 import com.sg.watchmarket.data.cache.SharedPreferencesMarketResponseCache
 import com.sg.watchmarket.data.dto.QuoteDto
 import java.util.Locale
+import kotlin.math.abs
 import androidx.wear.protolayout.LayoutElementBuilders
 import androidx.wear.protolayout.LayoutElementBuilders.Column
 import androidx.wear.protolayout.LayoutElementBuilders.Spacer
@@ -123,12 +124,12 @@ private fun quoteTileContent(quotes: List<QuoteDto>): LayoutElementBuilders.Layo
     val builder = Column.Builder()
     normalizedQuotes.forEachIndexed { index, quote ->
         if (index > 0) {
-            builder.addContent(tileSpacer(5f))
+            builder.addContent(tileSpacer(3f))
         }
         builder.addContent(
             text(
                 text = quote.toTileLine().layoutString,
-                typography = BODY_LARGE,
+                typography = BODY_MEDIUM,
             ),
         )
     }
@@ -146,7 +147,29 @@ private fun QuoteDto.toTileLine(): String {
         .substringBefore("/")
         .trim()
         .ifBlank { id }
-    return "$label ${formatTileChange(changeRate24h)}"
+    return "$label ${formatTilePrice(price)} ${formatTileChange(changeRate24h)}"
+}
+
+private fun formatTilePrice(price: Double): String {
+    val absolutePrice = abs(price)
+    val sign = if (price < 0.0) "-" else ""
+    if (absolutePrice >= 1_000_000.0) {
+        return String.format(Locale.US, "%s%.2fM", sign, absolutePrice / 1_000_000.0)
+    }
+    if (absolutePrice >= 10_000.0) {
+        return String.format(Locale.US, "%s%.1fK", sign, absolutePrice / 1_000.0)
+    }
+    if (absolutePrice >= 1_000.0) {
+        return String.format(Locale.US, "%s%.2fK", sign, absolutePrice / 1_000.0)
+    }
+
+    val decimals = when {
+        absolutePrice >= 1.0 -> 2
+        absolutePrice >= 0.01 -> 4
+        absolutePrice > 0.0 -> 8
+        else -> 2
+    }
+    return String.format(Locale.US, "%,.${decimals}f", price)
 }
 
 private fun formatTileChange(changeRate: Double): String =

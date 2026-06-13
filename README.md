@@ -76,9 +76,9 @@ The debug APK includes a Wear OS Tile named `Market glance`. On the watch:
 1. Long-press the watch face.
 2. Edit tiles/widgets.
 3. Add `Market glance`.
-4. Open the app once to load quotes; the tile then shows the last successful BTC, ETH, SOL, and XRP change-rate cache.
+4. Open the app once to load quotes; the tile then shows the last successful BTC, ETH, SOL, and XRP price/change cache.
 
-The tile opens the main app when tapped. It shows compact 24h percentage changes only and does not call Binance, KIS, or any provider directly.
+The tile opens the main app when tapped. It shows compact prices plus 24h percentage changes and does not call Binance, KIS, or any provider directly.
 
 ## Add Assets On The Watch
 
